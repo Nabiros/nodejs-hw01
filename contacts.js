@@ -1,39 +1,63 @@
 const path = require('path');
 const fs = require('fs').promises;
+const { v4: uuidv4 } = require('uuid');
 
 const contactsPath = path.resolve('./db/contacts.json');
 
-// TODO: задокументировать каждую функцию
+fs.readFile(contactsPath, 'utf8', (error, data) => {
+  if (error) {
+    console.log(error)
+    return
+  }
+  const jsonParse = JSON.parse(data)
+  console.log(jsonParse)
+})
 
-const listContacts = (async () => {
+async function listContacts () {
   try {
     const data = await fs.readFile(contactsPath, 'utf8')
-    console.log(JSON.parse(data))
+    return JSON.parse(data)
   } catch (error) {
     console.error(error)
   }
-});
-
-function getContactById(contactId) {
-  // ...твой код
 };
 
-function removeContact(contactId) {
-  // ...твой код
+async function getContactById(contactId) {
+  try {
+    const contacts = await listContacts();
+    const findContactById = contacts.find(contact => contact.id === Number(contactId))
+    return findContactById;
+  }
+  catch (error) {
+    console.error(error);
+  }
 };
 
-function addContact(name, email, phone) {
-  fs.appendFile(contactsPath, 'test', 'utf8')
+async function removeContact(contactId) {
+  try {
+    const contact = await listContacts();
+    const newContactList = contact.filter(contact => contact.id !== Number(contactId))
+    await fs.writeFile(contactsPath, JSON.stringify(newContactList, null, 2))
+    return newContactList;
+  }
+  catch (error) {
+    console.error(error)
+  }
+};
+
+async function addContact(name, email, phone) {
+  const newContact = { id: uuidv4(), name, email, phone }
+  try {
+    const findContacts = await fs.readFile(contactsPath, 'utf8')
+    const parseContacts = JSON.parse(findContacts);
+    const newContactList = [...parseContacts, newContact]
+    await fs.writeFile(contactsPath, JSON.stringify(newContactList, null, 2), 'utf8');
+    return newContactList;
+  }
+  catch (error) {
+    console.error(error)
+  }
 }
-
-// const addContact = async (name, email, phone)=> {
-//   const newContact = '';
-//   try {
-//     await fs.writeFile(contactsPath, newContact, 'utf8');
-//   } catch (error) {
-//     console.error(error);
-//   }
-// };
 
 module.exports = {
     listContacts,
@@ -41,16 +65,3 @@ module.exports = {
     removeContact,
     addContact
 };
-
-
-// fs.readFile(path[, options], callback)
-// fs.writeFile(file, data[, options], callback)
-
-// function listContacts() {
-//   fs.readFile(contactsPath, 'utf8', (error, data) => {
-//   if (error) {
-//     console.error(error);
-//   }
-//     console.log(data);
-// })
-// };
