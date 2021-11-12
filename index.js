@@ -1,14 +1,43 @@
-const contacts = require('./contacts').listContacts();
+const { listContacts, getContactById, removeContact, addContact } = require('./contacts');
 
-console.log(contacts);
-// const fs = require('fs').promises;
-// const path = require('path');
+const { Command } = require('commander');
+const program = new Command();
+program
+  .option('-a, --action <type>', 'choose action')
+  .option('-i, --id <type>', 'user id')
+  .option('-n, --name <type>', 'user name')
+  .option('-e, --email <type>', 'user email')
+  .option('-p, --phone <type>', 'user phone');
 
-// async () => {
-//   try {
-//     const data = await fs.readFile(path.resolve('./package.json'), 'utf8')
-//     console.log(JSON.parse(data).dependencies)
-//   } catch (error) {
-//     console.error(error)
-//   }
-// }
+program.parse(process.argv);
+
+const argv = program.opts();
+
+const invokeAction = async({ action, id, name, email, phone }) => {
+  switch (action) {
+    case 'list':
+          const contList = await listContacts();
+          console.table(contList);
+      break;
+
+    case 'get':
+          const getContId = await getContactById(id);
+          console.table(getContId);
+      break;
+
+    case 'add':
+          const addNewContact = await addContact(name, email, phone);
+          console.table(addNewContact);
+      break;
+
+    case 'remove':
+          const removeContactById = await removeContact(id)
+          console.table(removeContactById)
+      break;
+
+    default:
+      console.warn('\x1B[31m Unknown action type!');
+  }
+}
+
+invokeAction(argv);
