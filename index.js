@@ -1,6 +1,6 @@
-const contacts = require('./contacts');
+const contacts = require('./contacts').listContacts();
 
-console.log(contacts.listContacts());
+console.log(contacts);
 // const fs = require('fs').promises;
 // const path = require('path');
 
